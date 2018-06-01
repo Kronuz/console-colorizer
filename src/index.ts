@@ -17,10 +17,17 @@
 // console.error('🔥  %cSome message here\n', 'rgb(255, 34, 0)', { a: 1, b: 2, c: [ 3, 4, 5 ] });
 // console.info('%cSome message here', console.rgb(0, 136, 255));
 
-const color_name = require('color-name');
+import colorName from 'color-name';
+
+interface Color {
+  red: number;
+  green: number;
+  blue: number;
+  alpha: number;
+}
 
 const colors_re = RegExp(`\
-\\b(${Object.keys(color_name).join('|')})\\b\
+\\b(${Object.keys(colorName).join('|')})\\b\
 |\
 #([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])\\b\
 |\
@@ -35,7 +42,7 @@ const colors_re = RegExp(`\
 \\bhsla\\(\\s*(\\d+|\\d*\\.\\d+)\\s*,\\s*(\\d+|\\d*\\.\\d+)%\\s*,\\s*(\\d+|\\d*\\.\\d+)%\\s*,\\s*(\\d+|\\d*\\.\\d+)\\s*\\)\
 `);
 
-const hsla = (hue, saturation, lightness, alpha) => {
+export const hsla = (hue: number, saturation: number, lightness: number, alpha: number): Color => {
   var h = hue / 360;
   var s = saturation / 100;
   var l = lightness / 100;
@@ -44,7 +51,7 @@ const hsla = (hue, saturation, lightness, alpha) => {
   if (s === 0) {
     r = g = b = l;
   } else {
-    var hue2rgb = function hue2rgb(p, q, t) {
+    var hue2rgb = (p, q, t) => {
       if (t < 0) t += 1;
       if (t > 1) t -= 1;
       if (t < 1 / 6) return p + (q - p) * 6 * t;
@@ -66,18 +73,18 @@ const hsla = (hue, saturation, lightness, alpha) => {
   };
 };
 
-const hsl = (hue, saturation, lightness) => hsla(hue, saturation, lightness, 1);
+export const hsl = (hue: number, saturation: number, lightness: number): Color => hsla(hue, saturation, lightness, 1);
 
-const rgba = (red, green, blue, alpha) => ({ red, green, blue, alpha: alpha });
+export const rgba = (red: number, green: number, blue: number, alpha: number): Color => ({ red, green, blue, alpha: alpha });
 
-const rgb = (red, green, blue) => rgba(red, green, blue, 1);
+export const rgb = (red: number, green: number, blue: number): Color => rgba(red, green, blue, 1);
 
-const ansi = (color, bold) =>
+const ansi = (color: Color, bold?: boolean) =>
   `\x1b[${bold ? 1 : 0};38;2;${Math.round(color.red * color.alpha)};${Math.round(
     color.green * color.alpha,
   )};${Math.round(color.blue * color.alpha)}m`;
 
-const css = (color, bold) =>
+const css = (color: Color, bold?: boolean) =>
   `${bold ? 'font-weight:bold;' : ''}color:rgba(${color.red},${color.green},${color.blue},${
     color.alpha
   });`;
@@ -88,15 +95,16 @@ const bClear = length => {
   return `${b}${s}${b}`;
 };
 
-const normalizeColor = color => {
+const normalizeColor = (color: string | Color) => {
   let bold = false;
+  let out: Color;
   if (typeof color === 'string') {
-    bold = color.match(/\bbold\b/);
+    bold = /\bbold\b/.test(color);
     const match = color.match(colors_re);
     if (match) {
       if (match[1]) {
-        const [red, green, blue] = color_name[match[1]];
-        color = rgb(red, green, blue);
+        const [red, green, blue] = colorName[match[1]];
+        out = rgb(red, green, blue);
       } else {
         const base = match[5] || match[2] ? 16 : 10;
         const fn = match[18] || match[15] ? hsla : rgba;
@@ -113,26 +121,36 @@ const normalizeColor = color => {
           base,
         );
         const alpha = parseFloat(match[21] || match[14] || '1.0');
-        color = fn(red_hue, green_saturation, blue_lightness, alpha);
+        out = fn(red_hue, green_saturation, blue_lightness, alpha);
       }
     } else {
-      color = null;
+      out = rgb(127, 127, 127);
     }
   }
 
   if (!color) {
-    color = rgb(127, 127, 127);
+    out = rgb(127, 127, 127);
   }
 
-  return [color, bold];
+  return {
+    color: out,
+    bold,
+  };
 };
 
 const cssFont0 = 'font-size:0;';
 const cssFont1 = 'font-size:1;';
 const ansiClear = '\x1b[m';
 
-function consoleColorizer(colored) {
-  colored = colored || {};
+interface ColorizedConsole extends Console {
+  rgb(red: number, green: number, blue: number): Color;
+  rgba(red: number, green: number, blue: number, alpha: number): Color;
+  hsl(hue: number, saturation: number, lightness: number): Color;
+  hsla(hue: number, saturation: number, lightness: number, alpha: number): Color;
+};
+
+export const consoleColorizer = (c?: Console): ColorizedConsole => {
+  const colored = (c || {}) as ColorizedConsole;
   const _console = {};
   const colored_console = (level, message, ...params) => {
     if (typeof message !== 'undefined' && params.length) {
@@ -142,7 +160,7 @@ function consoleColorizer(colored) {
       message = message.replace(/%[coO]/g, match => {
         const param = params.shift();
         if (match === '%c') {
-          const [color, bold] = normalizeColor(param);
+          const {color, bold} = normalizeColor(param);
           lastColor = color;
           const ansiFont = ansi(color, bold);
           const cssFont = css(color, bold);
@@ -184,9 +202,4 @@ function consoleColorizer(colored) {
   return colored;
 }
 
-consoleColorizer.hsl = hsl;
-consoleColorizer.hsla = hsla;
-consoleColorizer.rgb = rgb;
-consoleColorizer.rgba = rgba;
-
-module.exports = consoleColorizer;
+export default consoleColorizer;
