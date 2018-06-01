@@ -1,0 +1,19 @@
+{
+  "name": "console-colorizer",
+  "version": "0.1.0",
+  "description": "Adds colored console logging (for node and browser)",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "babel src --presets babel-preset-es2015 --out-dir dist",
+    "prepublish": "npm run build"
+  },
+  "author": "German Mendez Bravo (Kronuz)",
+  "license": "MIT",
+  "dependencies": {
+    "color-name": "^1.1.3"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1"
+  }
+}
