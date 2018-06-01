@@ -5,8 +5,11 @@ console compatible with both terminal *and* browser.
 
 Example:
 
-```js
-require('console-colorizer')(console);
+```es6
+import consoleColorizer from 'console-colorizer';
+
+// colorize console:
+consoleColorizer(console);
 
 console.log('%cSome message here\n', 'bold hsla(120, 100%, 30%, 0.8)', { a: 1, b: 2, c: [ 3, 4, 5 ] });
 ```

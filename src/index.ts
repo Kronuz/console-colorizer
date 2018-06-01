@@ -13,7 +13,7 @@
 // rgb(255, 68, 0)
 // rgb(255, 34, 0)
 
-// require('console-colorizer')(console);
+// require('console-colorizer').consoleColorizer(console);
 // console.error('🔥  %cSome message here\n', 'rgb(255, 34, 0)', { a: 1, b: 2, c: [ 3, 4, 5 ] });
 // console.info('%cSome message here', console.rgb(0, 136, 255));
 
