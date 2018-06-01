@@ -17,7 +17,7 @@
 // console.error('🔥  %cSome message here\n', 'rgb(255, 34, 0)', { a: 1, b: 2, c: [ 3, 4, 5 ] });
 // console.info('%cSome message here', console.rgb(0, 136, 255));
 
-import colorName from 'color-name';
+import * as colorName from 'color-name';
 
 interface Color {
   red: number;
@@ -143,6 +143,7 @@ const cssFont1 = 'font-size:1;';
 const ansiClear = '\x1b[m';
 
 interface ColorizedConsole extends Console {
+  __colorized: true;
   rgb(red: number, green: number, blue: number): Color;
   rgba(red: number, green: number, blue: number, alpha: number): Color;
   hsl(hue: number, saturation: number, lightness: number): Color;
@@ -151,6 +152,9 @@ interface ColorizedConsole extends Console {
 
 export const consoleColorizer = (c?: Console): ColorizedConsole => {
   const colored = (c || {}) as ColorizedConsole;
+  if (colored.__colorized) {
+    return colored;
+  }
   const _console = {};
   const colored_console = (level, message, ...params) => {
     if (typeof message !== 'undefined' && params.length) {
@@ -199,6 +203,7 @@ export const consoleColorizer = (c?: Console): ColorizedConsole => {
   colored.hsla = hsla;
   colored.rgb = rgb;
   colored.rgba = rgba;
+  colored.__colorized = true;
   return colored;
 }
 
