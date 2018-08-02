@@ -161,9 +161,9 @@ export const consoleColorizer = (c?: Console): ColorizedConsole => {
       const args = [];
       const objs = [];
       let lastColor = null;
-      message = message.replace(/%[coO]/g, match => {
+      message = message.replace(/%(?:([-])?(\d+|\*)?(?:\.(\d+|\*))?([disfbxejcoO%]))/g, (match, flags, width, precision, specifier) => {
         const param = params.shift();
-        if (match === '%c') {
+        if (specifier === 'c') {
           const {color, bold} = normalizeColor(param);
           lastColor = color;
           const ansiFont = ansi(color, bold);
@@ -171,9 +171,11 @@ export const consoleColorizer = (c?: Console): ColorizedConsole => {
           args.push(cssFont0);
           args.push(`${cssFont}/*${bClear(cssFont0.length + cssFont.length + 4)}\x1b[K*/${bClear(2)}`);
           return `%c\b\b${ansiFont}%c\b\b`;
+        } else if (specifier === 'o' || specifier === 'O') {
+          objs.push(param);
+          return '';
         }
-        objs.push(param);
-        return '';
+        return param;
       });
       if (lastColor && !message.endsWith('\b\b')) {
         const color = rgba(lastColor.red, lastColor.green, lastColor.blue, lastColor.alpha * 0.6);
