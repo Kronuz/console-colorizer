@@ -1,6 +1,6 @@
 {
   "name": "console-colorizer",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Adds colored console logging (for node and browser)",
   "main": "dist/index",
   "typings": "dist/index",
