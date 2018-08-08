@@ -1,15 +1,16 @@
 {
-  "name": "console-colorizer",
   "version": "0.1.4",
+  "name": "console-colorizer",
   "description": "Adds colored console logging (for node and browser)",
+  "homepage": "https://github.com/Kronuz/react-gestalt-collage",
+  "license": "MIT",
+  "author": "German Mendez Bravo (Kronuz)",
   "main": "dist/index",
   "typings": "dist/index",
   "scripts": {
     "build": "tsc src/index.ts --outDir dist -d --lib dom,es5,es2015,scripthost",
     "prepublish": "npm run build"
   },
-  "author": "German Mendez Bravo (Kronuz)",
-  "license": "MIT",
   "dependencies": {
     "color-name": "^1.1.3"
   },
